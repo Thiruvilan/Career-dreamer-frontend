@@ -2,9 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import AppLayout from "@/components/layout/AppLayout";
+
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import PersonaSelection from "./pages/PersonaSelection";
@@ -25,31 +25,11 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* Landing Pages - with full navbar and footer */}
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<Index />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-          </Route>
-
-          {/* App Pages - with app navigation */}
-          <Route element={<AppLayout />}>
-            <Route path="/persona-selection" element={<PersonaSelection />} />
-            <Route path="/potential-prism" element={<PotentialPrism />} />
-            <Route path="/skill-assessment" element={<SkillAssessment />} />
-            <Route path="/identity-statement" element={<IdentityStatement />} />
-            <Route path="/skill-selector" element={<SkillSelector />} />
-            <Route path="/goal-declaration" element={<GoalDeclaration />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/roadmap/:careerType" element={<Roadmap />} />
-          </Route>
-
-          {/* Catch-all route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      {/*
+        This file is part of the old React Router setup.
+        Next.js App Router routes are defined under /app.
+      */}
+      {null}
     </TooltipProvider>
   </QueryClientProvider>
 );

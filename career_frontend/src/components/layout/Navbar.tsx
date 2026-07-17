@@ -1,5 +1,8 @@
+"use client";
+
 import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
@@ -12,6 +15,7 @@ import {
   LayoutDashboard,
   BookOpen,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,7 +24,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 
 const navItems = [
   { label: "Features", href: "#features" },
@@ -29,35 +32,25 @@ const navItems = [
   { label: "About", href: "#about" },
 ];
 
-const Navbar = () => {
+export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
 
-  const isAuthPage =
-    location.pathname === "/signin" || location.pathname === "/signup";
+  const router = useRouter();
+  const pathname = usePathname() ?? "";
+
   const isDashboard =
-    location.pathname === "/dashboard" ||
-    location.pathname.startsWith("/roadmap");
+    pathname === "/dashboard" || pathname.startsWith("/roadmap");
 
-  const handleSignIn = () => {
-    navigate("/signin");
-  };
-
-  const handleSignUp = () => {
-    navigate("/signup");
-  };
+  const handleSignIn = () => router.push("/signin");
+  const handleSignUp = () => router.push("/signup");
 
   const navVariants = {
     hidden: { y: -100, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut",
-      },
+      transition: { duration: 0.5 },
     },
   };
 
@@ -71,7 +64,11 @@ const Navbar = () => {
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link
+            href="/"
+            className="flex items-center gap-2 group"
+            aria-label="CareerDreamer Home"
+          >
             <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center transition-transform group-hover:scale-110">
               <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
@@ -110,6 +107,7 @@ const Navbar = () => {
                     <ChevronDown className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
+
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="px-3 py-2">
                     <p className="font-medium">John Doe</p>
@@ -117,20 +115,26 @@ const Navbar = () => {
                       john@example.com
                     </p>
                   </div>
+
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+
+                  <DropdownMenuItem onClick={() => router.push("/dashboard")}>
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     Dashboard
                   </DropdownMenuItem>
+
                   <DropdownMenuItem>
                     <BookOpen className="w-4 h-4 mr-2" />
                     My Roadmaps
                   </DropdownMenuItem>
+
                   <DropdownMenuItem>
                     <Settings className="w-4 h-4 mr-2" />
                     Settings
                   </DropdownMenuItem>
+
                   <DropdownMenuSeparator />
+
                   <DropdownMenuItem className="text-destructive">
                     <LogOut className="w-4 h-4 mr-2" />
                     Sign Out
@@ -160,7 +164,7 @@ const Navbar = () => {
           {/* Mobile Menu Button */}
           <button
             className="lg:hidden p-2 rounded-lg hover:bg-primary/10 transition-colors"
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={() => setIsOpen((v) => !v)}
             aria-label="Toggle menu"
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -188,6 +192,7 @@ const Navbar = () => {
                     {item.label}
                   </a>
                 ))}
+
                 <div className="pt-4 space-y-3">
                   {isDashboard ? (
                     <>
@@ -195,13 +200,14 @@ const Navbar = () => {
                         variant="ghost"
                         className="w-full justify-start"
                         onClick={() => {
-                          navigate("/dashboard");
+                          router.push("/dashboard");
                           setIsOpen(false);
                         }}
                       >
                         <LayoutDashboard className="w-4 h-4 mr-2" />
                         Dashboard
                       </Button>
+
                       <Button
                         variant="destructive"
                         className="w-full justify-start"
@@ -242,6 +248,4 @@ const Navbar = () => {
       </div>
     </motion.nav>
   );
-};
-
-export default Navbar;
+}

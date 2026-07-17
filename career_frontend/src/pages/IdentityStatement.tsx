@@ -2,11 +2,18 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import { 
-  BrainCircuit, Sparkles, X, Plus, RefreshCw, 
-  ArrowRight, Loader2, GraduationCap, 
-  Wrench, Heart
+import { useRouter } from "next/navigation";
+import {
+  BrainCircuit,
+  Sparkles,
+  X,
+  Plus,
+  RefreshCw,
+  ArrowRight,
+  Loader2,
+  GraduationCap,
+  Wrench,
+  Heart,
 } from "lucide-react";
 
 // --- TYPES ---
@@ -25,27 +32,29 @@ interface UserDraft {
 }
 
 export default function IdentityStatement() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [isGenerating, setIsGenerating] = useState(true);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isFusing, setIsFusing] = useState(false);
-  
+
   // Left Panel - Editable Tags
   const [education, setEducation] = useState<string[]>([]);
   const [skills, setSkills] = useState<string[]>([]);
   const [interests, setInterests] = useState<string[]>([]);
-  
+
   // New tag input
   const [newEducation, setNewEducation] = useState("");
   const [newSkill, setNewSkill] = useState("");
   const [newInterest, setNewInterest] = useState("");
-  
+
   // Right Panel - Identity Statement
   const [identityStatement, setIdentityStatement] = useState("");
-  
+
   // Data from previous steps
   const [verifiedSkills, setVerifiedSkills] = useState<TopSkill[]>([]);
-  const [psychometricDraft, setPsychometricDraft] = useState<UserDraft | null>(null);
+  const [psychometricDraft, setPsychometricDraft] = useState<UserDraft | null>(
+    null,
+  );
 
   // Initialize on mount
   useEffect(() => {
@@ -56,9 +65,21 @@ export default function IdentityStatement() {
         if (!storedSkills) {
           // Use defaults if not available
           setVerifiedSkills([
-            { skill_name: "Problem Solving", score: 85, reasoning: "Based on your analytical traits" },
-            { skill_name: "Communication", score: 78, reasoning: "Based on your empathy scores" },
-            { skill_name: "Technical Writing", score: 72, reasoning: "Based on your systems thinking" },
+            {
+              skill_name: "Problem Solving",
+              score: 85,
+              reasoning: "Based on your analytical traits",
+            },
+            {
+              skill_name: "Communication",
+              score: 78,
+              reasoning: "Based on your empathy scores",
+            },
+            {
+              skill_name: "Technical Writing",
+              score: 72,
+              reasoning: "Based on your systems thinking",
+            },
           ]);
         } else {
           const parsedSkills = JSON.parse(storedSkills);
@@ -76,7 +97,6 @@ export default function IdentityStatement() {
 
         // Generate initial identity statement
         await generateIdentityStatement();
-        
       } catch (error) {
         console.error("Init Error:", error);
         toast.error("Failed to initialize. Please retake assessments.");
@@ -94,29 +114,43 @@ export default function IdentityStatement() {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/v1/identity/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: "student_mvp_01",
-          constraints: {
-            education: education.length > 0 ? education : ["Computer Science"],
-            skills: skills.length > 0 ? skills : verifiedSkills.map(s => s.skill_name),
-            interests: interests.length > 0 ? interests : ["Technology", "Problem Solving"]
-          },
-          psychometric_profile: psychometricDraft?.psychological_profile || "Analytical and empathetic problem solver"
-        }),
-      });
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/v1/identity/generate",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: "student_mvp_01",
+            constraints: {
+              education:
+                education.length > 0 ? education : ["Computer Science"],
+              skills:
+                skills.length > 0
+                  ? skills
+                  : verifiedSkills.map((s) => s.skill_name),
+              interests:
+                interests.length > 0
+                  ? interests
+                  : ["Technology", "Problem Solving"],
+            },
+            psychometric_profile:
+              psychometricDraft?.psychological_profile ||
+              "Analytical and empathetic problem solver",
+          }),
+        },
+      );
 
-      if (!response.ok) throw new Error("Failed to generate identity statement");
-      
+      if (!response.ok)
+        throw new Error("Failed to generate identity statement");
+
       const data = await response.json();
       setIdentityStatement(data.identity_statement);
-      
     } catch (error) {
       console.error("Generation Error:", error);
       // Fallback statement
-      setIdentityStatement("I am a dedicated professional with strong analytical abilities and a passion for solving complex problems. By applying my technical skills and interpersonal strengths, I aim to contribute meaningfully to innovative projects that make a difference.");
+      setIdentityStatement(
+        "I am a dedicated professional with strong analytical abilities and a passion for solving complex problems. By applying my technical skills and interpersonal strengths, I aim to contribute meaningfully to innovative projects that make a difference.",
+      );
     } finally {
       setIsGenerating(false);
       setIsRegenerating(false);
@@ -146,15 +180,15 @@ export default function IdentityStatement() {
   };
 
   const removeEducation = (item: string) => {
-    setEducation(education.filter(e => e !== item));
+    setEducation(education.filter((e) => e !== item));
   };
 
   const removeSkill = (item: string) => {
-    setSkills(skills.filter(s => s !== item));
+    setSkills(skills.filter((s) => s !== item));
   };
 
   const removeInterest = (item: string) => {
-    setInterests(interests.filter(i => i !== item));
+    setInterests(interests.filter((i) => i !== item));
   };
 
   const handleRegenerate = () => {
@@ -163,14 +197,14 @@ export default function IdentityStatement() {
 
   const handleExplorePaths = async () => {
     setIsFusing(true);
-    
+
     try {
       // Get all data for graph fusion
       const storedDraft = localStorage.getItem("prismDraft");
       if (!storedDraft) throw new Error("No psychometric profile found");
-      
+
       const psychometric_draft = JSON.parse(storedDraft);
-      
+
       // Prepare skills as verified skills format
       const verified_skills_data = {
         // Convert skills array to numeric scores (simplified)
@@ -179,9 +213,21 @@ export default function IdentityStatement() {
         english_communication: 75,
         science_logic: 80,
         digital_creation: skills.length > 0 ? 80 : 0,
-        system_troubleshooting: skills.some(s => s.toLowerCase().includes("troubleshoot")) ? 80 : 0,
-        community_management: interests.some(i => i.toLowerCase().includes("community")) ? 80 : 0,
-        commercial_hustle: interests.some(i => i.toLowerCase().includes("business")) ? 80 : 0
+        system_troubleshooting: skills.some((s) =>
+          s.toLowerCase().includes("troubleshoot"),
+        )
+          ? 80
+          : 0,
+        community_management: interests.some((i) =>
+          i.toLowerCase().includes("community"),
+        )
+          ? 80
+          : 0,
+        commercial_hustle: interests.some((i) =>
+          i.toLowerCase().includes("business"),
+        )
+          ? 80
+          : 0,
       };
 
       // Call graph fusion endpoint
@@ -191,21 +237,20 @@ export default function IdentityStatement() {
         body: JSON.stringify({
           user_id: "student_mvp_01",
           psychometric_draft: psychometric_draft,
-          verified_skills: verified_skills_data
+          verified_skills: verified_skills_data,
         }),
       });
 
       if (!response.ok) throw new Error("Graph Fusion failed");
-      
+
       const data = await response.json();
-      
+
       // Save the final matches and navigate to dashboard
       localStorage.setItem("finalMatches", JSON.stringify(data.matches));
       localStorage.setItem("identityStatement", identityStatement);
-      
-      toast.success("Graph Fusion Complete!");
-      navigate("/dashboard");
 
+      toast.success("Graph Fusion Complete!");
+      router.push("/dashboard");
     } catch (error) {
       console.error("Fusion Error:", error);
       toast.error("Failed to connect to the Graph Engine.");
@@ -219,9 +264,12 @@ export default function IdentityStatement() {
       <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6">
         <div className="text-center space-y-6 max-w-md">
           <BrainCircuit className="w-20 h-20 text-blue-500 animate-pulse mx-auto" />
-          <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Crafting Your Identity...</h2>
+          <h2 className="text-3xl font-bold text-slate-800 tracking-tight">
+            Crafting Your Identity...
+          </h2>
           <p className="text-slate-500 font-medium">
-            Our AI is weaving your traits, skills, and aspirations into a compelling career narrative.
+            Our AI is weaving your traits, skills, and aspirations into a
+            compelling career narrative.
           </p>
         </div>
       </div>
@@ -231,23 +279,21 @@ export default function IdentityStatement() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-4 sm:p-6 lg:p-8 font-sans">
       <div className="max-w-7xl mx-auto">
-        
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight mb-2">
             Your Career Identity
           </h1>
           <p className="text-slate-500">
-            Review and customize your profile. Click "Re-generate" to update the statement.
+            Review and customize your profile. Click "Re-generate" to update the
+            statement.
           </p>
         </div>
 
         {/* Split Screen Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          
           {/* LEFT PANEL: Constraint Controllers (Inputs) */}
           <div className="space-y-6">
-            
             {/* Education Section */}
             <Card className="p-6 bg-white border-0 shadow-lg rounded-[1.5rem]">
               <div className="flex items-center gap-3 mb-4">
@@ -256,21 +302,24 @@ export default function IdentityStatement() {
                 </div>
                 <h3 className="text-lg font-bold text-slate-800">Education</h3>
               </div>
-              
+
               <div className="flex flex-wrap gap-2 mb-4">
                 {education.map((item, idx) => (
-                  <span 
-                    key={idx} 
+                  <span
+                    key={idx}
                     className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-700 rounded-full text-sm font-medium"
                   >
                     {item}
-                    <button onClick={() => removeEducation(item)} className="hover:text-purple-900">
+                    <button
+                      onClick={() => removeEducation(item)}
+                      className="hover:text-purple-900"
+                    >
                       <X className="w-4 h-4" />
                     </button>
                   </span>
                 ))}
               </div>
-              
+
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -297,21 +346,24 @@ export default function IdentityStatement() {
                 </div>
                 <h3 className="text-lg font-bold text-slate-800">Skills</h3>
               </div>
-              
+
               <div className="flex flex-wrap gap-2 mb-4">
                 {skills.map((item, idx) => (
-                  <span 
-                    key={idx} 
+                  <span
+                    key={idx}
                     className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-medium"
                   >
                     {item}
-                    <button onClick={() => removeSkill(item)} className="hover:text-green-900">
+                    <button
+                      onClick={() => removeSkill(item)}
+                      className="hover:text-green-900"
+                    >
                       <X className="w-4 h-4" />
                     </button>
                   </span>
                 ))}
               </div>
-              
+
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -338,21 +390,24 @@ export default function IdentityStatement() {
                 </div>
                 <h3 className="text-lg font-bold text-slate-800">Interests</h3>
               </div>
-              
+
               <div className="flex flex-wrap gap-2 mb-4">
                 {interests.map((item, idx) => (
-                  <span 
-                    key={idx} 
+                  <span
+                    key={idx}
                     className="inline-flex items-center gap-2 px-4 py-2 bg-pink-50 text-pink-700 rounded-full text-sm font-medium"
                   >
                     {item}
-                    <button onClick={() => removeInterest(item)} className="hover:text-pink-900">
+                    <button
+                      onClick={() => removeInterest(item)}
+                      className="hover:text-pink-900"
+                    >
                       <X className="w-4 h-4" />
                     </button>
                   </span>
                 ))}
               </div>
-              
+
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -370,7 +425,6 @@ export default function IdentityStatement() {
                 </button>
               </div>
             </Card>
-
           </div>
 
           {/* RIGHT PANEL: Identity Statement (Output) */}
@@ -394,7 +448,7 @@ export default function IdentityStatement() {
                   Re-generate
                 </button>
               </div>
-              
+
               <div className="prose prose-slate max-w-none">
                 <p className="text-lg text-slate-700 leading-relaxed whitespace-pre-line">
                   {identityStatement}
@@ -408,12 +462,16 @@ export default function IdentityStatement() {
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {verifiedSkills.map((skill, idx) => (
-                    <div 
-                      key={idx} 
+                    <div
+                      key={idx}
                       className="flex items-center justify-between p-3 bg-slate-50 rounded-xl"
                     >
-                      <span className="text-sm font-medium text-slate-700">{skill.skill_name}</span>
-                      <span className="text-sm font-bold text-blue-600">{skill.score}%</span>
+                      <span className="text-sm font-medium text-slate-700">
+                        {skill.skill_name}
+                      </span>
+                      <span className="text-sm font-bold text-blue-600">
+                        {skill.score}%
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -449,10 +507,8 @@ export default function IdentityStatement() {
               </div>
             </Card>
           </div>
-
         </div>
       </div>
     </div>
   );
 }
-

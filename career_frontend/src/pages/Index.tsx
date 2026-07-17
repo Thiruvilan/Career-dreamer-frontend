@@ -2,10 +2,12 @@ import CareerHero from "@/components/CareerHero";
 import CareerFeatures from "@/components/CareerFeatures";
 import CareerProcess from "@/components/CareerProcess";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+("use client");
+
+import { useRouter } from "next/navigation";
 
 const Index = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <div className="min-h-screen">
@@ -27,7 +29,7 @@ const Index = () => {
             <Button
               size="lg"
               variant="hero"
-              onClick={() => navigate("/persona-selection")}
+              onClick={() => router.push("/persona-selection")}
               className="text-lg px-8 py-4"
             >
               Start Your Journey Now

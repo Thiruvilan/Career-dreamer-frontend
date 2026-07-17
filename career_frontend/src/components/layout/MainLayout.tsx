@@ -1,5 +1,7 @@
+"use client";
+
 import { useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
@@ -28,13 +30,14 @@ const pageVariants = {
   },
 };
 
-const MainLayout = () => {
-  const location = useLocation();
+const MainLayout = ({ children }: { children: React.ReactNode }) => {
+  const pathname = usePathname();
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Pages that should show the full layout (with navbar and footer)
   const fullLayoutPages = ["/", "/signin", "/signup"];
-  const showFullLayout = fullLayoutPages.includes(location.pathname);
+  const showFullLayout = fullLayoutPages.includes(pathname);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -57,13 +60,13 @@ const MainLayout = () => {
       <main className="flex-1 pt-16 md:pt-20">
         <AnimatePresence mode="wait">
           <motion.div
-            key={location.pathname}
+            key={pathname}
             initial="initial"
             animate="animate"
             exit="exit"
             variants={pageVariants}
           >
-            <Outlet />
+            {children}
           </motion.div>
         </AnimatePresence>
       </main>
